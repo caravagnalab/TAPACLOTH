@@ -1,12 +1,13 @@
 #' Classify mutations using a (Beta-)Binomial model-based test.
 #'
 #' @param x An object of class \code{'TAPACLOTH'} generated with function `init`.
-#' @param alpha_level The significance level to be used in hypothesis testing.
+#' @param cutoff Likelihood cut-off for class assignment.
 #' @param model Model used for the classification task, either "Binomial" (no over-dispersion) 
 #' or "Beta-Binomial" (over-dispersion included), that will be used as the expected 
 #' distribution for the number of reads with variant at fixed coverage and purity.
 #' @param rho If "Beta-Binomial" model is selected, this parameter tunes the over-dispersion
 #' of the expected distribution used for the test.
+#' @param karyotypes Karyotypes to be included among the possible classes.
 #' @return An object of class `TAPACLOTH` containing the input plus
 #' the classification data and paramters.
 #' @export
@@ -16,17 +17,19 @@
 #'          sample = example_data$sample,
 #'          purity = example_data$purity)
 #' x = run_classifier(
-#'     x, 
-#'     alpha_level = 1e-3, 
-#'    model = "Binomial")
+#'     x = x, 
+#'     model = "Beta-Binomial", 
+#'     rho = 0.01,
+#'     karyotypes = c("1:0","1:1","2:0","2:1","2:2")
+#'     )
 #' print(x)
 run_classifier = function(x,
-                          alpha_level = 0.01,
+                          cutoff = 0.75,
                           model = "Binomial",
-                          rho = NA,
-                          karyotypes = c("1:0","1:1","2:0","2:1","2:2"),
-                          closer = TRUE)
-{
+                          rho = 0.01,
+                          karyotypes = c("1:0","1:1","2:0","2:1","2:2")
+                          )
+  {
   stopifnot(inherits(x, "TAPACLOTH"))
   
   model = model %>% tolower()
@@ -46,42 +49,32 @@ run_classifier = function(x,
     
   x = idify(x)
     
-  pvalues = lapply(x$data$id, function(id) {
-    null_model = test_setup(
-      coverage = get_DP(x, mutation_id = id),
+  tests = lapply(x$data$id, function(id) {
+    
+    binomial_test(
+      test = get_NV(x, id),
+      DP = get_DP(x, id),
       purity = get_purity(x),
-      rho = rho,
-      alpha_level = alpha_level,
+      cutoff = cutoff,
       model = model,
-      karyotypes = karyotypes
+      rho = rho,
+      karyotypes = karyotypes,
     )
-    
-
-    pvalues = get_pvalues(x, null_model, id)
-    pvalues$pvalue = 1-p.adjust(1-pvalues$pvalue, method = "BH")
-    pvalues$outcome = pvalues$pvalue < 1 - alpha_level
-    if(all(pvalues$outcome == "FALSE")) {
-      if (closer) {
-        pvalues[closer_dist(null_model, get_NV(x, id), karyotypes), ]$outcome = TRUE
-      }
-    }
-    
-    return(pvalues)
   }) %>% 
     do.call(rbind, .)
   
-  if ((model %>% tolower()) == "binomial") {
+  if (model == "binomial") {
     test$classifier$binomial = list(
-      params = tibble(alpha = alpha_level),
-      data = full_join(x %>% idify() %>% get_data(), pvalues, by = c("id", "gene"))
+      params = tibble(cutoff = cutoff),
+      data = bind_cols(x %>% get_data(), tests)
     )
   }
   
-  if ((model %>% tolower()) == "beta-binomial") {
+  if (model == "beta-binomial") {
     test$classifier$`beta-binomial` = list(
-      params = tibble(alpha = alpha_level,
+      params = tibble(cutoff = cutoff,
                       rho = rho),
-      data = full_join(x %>% idify() %>% get_data(), pvalues, by = c("id", "gene"))
+      data = bind_cols(x %>% get_data(), tests)
     )
   }
   return(test)
