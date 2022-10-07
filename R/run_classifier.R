@@ -47,7 +47,7 @@ run_classifier = function(x,
     )
     cat("\n")
     
-  cli::cli_alert_info("Computing null model distributions and p-values.")
+  cli::cli_alert_info("Computing likelihoods and uncertainties.")
     
   x = idify(x)
     
@@ -55,7 +55,7 @@ run_classifier = function(x,
     
     # If classifying with a bias towards gene role, adapt karyotypes list accordingly.
     k_reduced = karyotypes
-    if(gene_role_specific){
+    if(gene_role_specific & !is.na(x %>% get_gene_role(id))){
       if(x %>% get_gene_role(id) == "TSG") k_reduced = c("1:0","1:1","2:0")
       if(x %>% get_gene_role(id) == "oncogene") k_reduced = c("1:1","2:1","2:2")
     } 
