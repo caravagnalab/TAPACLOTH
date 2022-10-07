@@ -105,7 +105,7 @@ binomial_test = function(test,
     dplyr::filter(NV == test)
   
   if(nrow(tested) > 1){
-    cli::cli_alert_info("With purity {.field {x$purity}} solutions {.filed {tested$label}}
+    cli::cli_alert_info("With purity {.field {purity}} solutions {.filed {tested$label}}
                         have exactly the same likelihood. Retrieving the simplest
                         one ({.filed {tested$label[1]}})")
     tested = tested[1,]
