@@ -1,0 +1,23 @@
+The tool TAPACLOTH has been originally used in
+
+------- ------- ------- -------
+Scalera et al. 
+Clonal KEAP1 mutations with loss of heterozygosity share reduced immunotherapy efficacy and low immune cell infiltration in lung adenocarcinoma. 
+Annals of Oncology, 2023
+https://doi.org/10.1016/j.annonc.2022.12.002
+------- ------- ------- -------
+Scalera et al. 
+Transcriptional Phenocopies of Deleterious KEAP1 Mutations Correlate with Survival Outcomes in Lung Cancer Treated with Immunotherapy
+Clinical Cancer Research, 2024
+https://doi.org/10.1158/1078-0432.CCR-24-0626
+------- ------- ------- -------
+
+since then we extented and evolved TAPACLOTH to a new tool that has been named INCOMMON
+
+------- ------- ------- -------
+Calonaci, Krasniqi et al.
+Mutation frequency and copy number alterations determine prognosis and metastatic tropism in 60,000 clinical cancer samples
+https://www.medrxiv.org/content/10.1101/2024.05.13.24307238v1
+------- ------- ------- -------
+
+INCOMMON is available at: https://github.com/caravagnalab/INCOMMON
